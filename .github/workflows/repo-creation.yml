@@ -24,9 +24,8 @@ jobs:
           script: |
             const issue = context.payload.issue;
             const repoName = issue.title.replace("New Repository Request: ", "").trim();
-            const body = issue.body || "";  // Ensure body is defined
+            const body = issue.body || "";
 
-            // Extract visibility from body (handling undefined safely)
             let visibility = "public"; // Default visibility
             const match = body.match(/Repository Visibility:\s*(public|private)/i);
             if (match) {
@@ -35,8 +34,8 @@ jobs:
 
             console.log(`Creating repo: ${repoName} with visibility: ${visibility}`);
 
-            await github.rest.repos.createInOrg({
-              org: context.repo.owner,
+            // Use the correct API based on whether it's an org or personal account
+            await github.rest.repos.createForAuthenticatedUser({
               name: repoName,
               private: visibility === "private"
             });
