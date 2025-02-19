@@ -1,0 +1,46 @@
+name: "Repository Creation"
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if issue is labeled
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = context.payload.issue;
+            if (!issue.labels.some(label => label.name === "create-repo")) {
+              console.log("Issue is not labeled with 'create-repo'. Exiting...");
+              return;
+            }
+
+      - name: Create GitHub Repository
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const repoName = issue.title.replace("New Repository Request: ", "").trim();
+            const body = issue.body.split('\n');
+            const visibility = body.find(line => line.startsWith("Repository Visibility")).split(": ")[1];
+
+            await github.rest.repos.createInOrg({
+              org: context.repo.owner,
+              name: repoName,
+              private: visibility === "private"
+            });
+
+      - name: Close Issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: "closed"
+            });
