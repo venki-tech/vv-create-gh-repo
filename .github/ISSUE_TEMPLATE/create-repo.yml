@@ -1,0 +1,21 @@
+name: "Create Repository"
+description: "Open an issue to create a new repository"
+title: "New Repository Request: <repo-name>"
+labels: ["create-repo"]
+body:
+  - type: input
+    id: repo_name
+    attributes:
+      label: "Repository Name"
+      description: "Enter the name of the repository to be created"
+      placeholder: "example-repo"
+    validations:
+      required: true
+  - type: dropdown
+    id: visibility
+    attributes:
+      label: "Repository Visibility"
+      description: "Should this repository be public or private?"
+      options:
+        - public
+        - private
